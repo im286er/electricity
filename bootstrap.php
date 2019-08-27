@@ -25,5 +25,3 @@ $router->group($routerAttribute, function (Router $router)
     include_once __DIR__ . '/App/Routes/public.php';
     include_once __DIR__ . '/App/Routes/private.php';
 });
-
-$router->run();

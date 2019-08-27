@@ -2,7 +2,6 @@
 
 namespace Package\Router;
 
-use App\Attributes\Server;
 use App\Handles\Handle;
 
 class Router
@@ -16,24 +15,24 @@ class Router
 
     function run()
     {
-        $route = $this->routes[Server::REQUEST_METHOD() . trim(Server::REQUEST_URI(), '/')];
+        $route = $this->routes[$_SERVER['REQUEST_METHOD'] . trim($_SERVER['SCRIPT_NAME'], '/')];
         if ($route)
         {
             $route = $this->currentRoute = new RouteAttribute($route);
             if ($route->handles)
             {
-                $this->sendThroughPipeline($route->handles, $this->execController());
+                return $this->sendThroughPipeline($route->handles, $this->execController());
             } else {
-                $this->execController()();
+                return $this->execController()();
             }
         }
-        return;
+        return '很显然, 我们压根么的这个功能, 我不晓得你从拉个地方进到起这个地方的';
     }
 
     function sendThroughPipeline(array $handles, \Closure $then)
     {
         $pipeline = array_reduce(array_reverse($handles), $this->carry(), $then);
-        $pipeline();
+        return $pipeline();
     }
 
     function carry()
@@ -45,7 +44,7 @@ class Router
                 $parameter = array_merge([$stack], $parameter);
                 /** @var Handle $handle */
                 $handle = new $name;
-                $handle->handle(...$parameter);
+                return $handle->handle(...$parameter);
             };
         };
     }
@@ -55,7 +54,7 @@ class Router
         $route = $this->currentRoute;
         return function () use ($route) {
             list($controller, $method) = explode('@', $route->action);
-            (new $controller)->$method();
+            return (new $controller)->$method();
         };
     }
 

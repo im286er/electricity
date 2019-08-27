@@ -11,12 +11,6 @@ class Attribute
         $this->attribute = $attribute;
     }
 
-    public static function __callStatic($name, $arguments)
-    {
-        $staticClass = static::class;
-        return (new $staticClass)->$name;
-    }
-
     function __get($name)
     {
         return $this->attribute[$name] ?? null;
