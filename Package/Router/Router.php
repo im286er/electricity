@@ -15,7 +15,7 @@ class Router
 
     function run()
     {
-        $route = $this->routes[$_SERVER['REQUEST_METHOD'] . trim($_SERVER['SCRIPT_NAME'], '/')];
+        $route = $this->routes[$_SERVER['REQUEST_METHOD'] . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/')];
         if ($route)
         {
             $route = $this->currentRoute = new RouteAttribute($route);
