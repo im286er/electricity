@@ -20,10 +20,15 @@ class Builder
         $this->model = $model;
     }
 
-    function update($setData)
+    function update($rows)
     {
-        $sql  = sprintf("UPDATE %s SET", $this->model->table);
-        $sql .= ' ';
+        $sql  = 'UPDATE ' . $this->model->table . ' SET';
+        $exec = [];
+        foreach($rows as $column as $row)
+        {
+            $sql    .= " $column=?";
+            $exec[] =  array_merge($exec, $row);
+        }
         foreach ($setData as $column => $setDatum)
         {
             $sql .= sprintf("`%s` = '%s', ", $column, $setDatum);
