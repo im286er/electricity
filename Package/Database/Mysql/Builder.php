@@ -5,58 +5,115 @@ namespace Package\Database\Mysql;
 use Package\Env\Env;
 use PDO;
 
-class Builder
-{
-    /** @var Model $model */
-    protected $model = null;
+class Builder {
 
-    protected $where = '';
+    /** @var Model null $model */
+    protected $model      = null;
 
-    /** @var PDO $pdo */
-    protected $pdo   = null;
+    /**
+     * @var array
+     * ['column', '=',     'datum']
+     * ['column', '!=',    'datum']
+     * ['column', 'in',    ['datum_1', 'datum_2']]
+     * ['column', 'notIn', ['datum_1', 'datum_2']]
+     */
+    protected $whereExec = [];
+
+    protected $whereSql  = '';
 
     function __construct(Model $model)
     {
         $this->model = $model;
     }
 
-    function update($rows)
+    function insert($attributeItems, $columns = null)
     {
-        $sql  = 'UPDATE ' . $this->model->table . ' SET';
-        $exec = [];
-        foreach($rows as $column as $row)
+        if (is_null($columns))
         {
-            $sql    .= " $column=?";
-            $exec[] =  array_merge($exec, $row);
+            $columns = array_keys($attributeItems[0]);
         }
-        foreach ($setData as $column => $setDatum)
+        $columnsSql = implode(', ', $columns);
+        $sql        = 'INSERT INTO' . ' ' . $this->model->table . " ($columnsSql) VALUES ";
+        $withExec   = [];
+        foreach ($attributeItems as $attribute)
         {
-            $sql .= sprintf("`%s` = '%s', ", $column, $setDatum);
+            $withExec = array_merge($withExec, array_values($attribute));
         }
-        $sql =  substr($sql, 0, -2);
-        $sql .= ' WHERE ' . substr($this->where, 0, -5);
-        return $this->exec($sql);
+        $sql .= implode(', ', array_pad([], count($attributeItems), $this->withCompact($withExec)));
+        return $this->execSql($sql, $withExec);
     }
 
-    function exec($sql)
+    function delete()
     {
-        if ($this->pdo)
+        $sql = 'DELETE FROM' . ' ' . $this->model->table . ' ';
+        return $this->execSql($sql, []);
+    }
+
+    /**
+     * @param $attributes
+     * ['column1' => 'datum_1', 'column_2' => 'datum_2']
+     *
+     * @return int
+     */
+    function update($attributes)
+    {
+        $sql      = 'UPDATE ' . $this->model->table . ' SET ';
+        $withExec = [];
+        foreach ($attributes as $column => $datum)
         {
-
+            $sql        .= "$column=? ";
+            $withExec[] =  $datum;
         }
-        return $sql;
+        return $this->execSql($sql, $withExec);
     }
 
-    function connect($drive)
+    function execSql($sql, $withExec)
     {
-        $env       = Env::env('mysql');
-        $dns       = sprintf('mysql:host:%s;dbname:%s', $env['ip'], $env['database']);
-        $this->pdo = new PDO($dns, $env['username'], $env['password']);
+        $sql .= $this->whereSql;
+        $pdo =  $this->getPdo();
+        $statement = $pdo->prepare($sql);
+        $statement->execute(array_merge($withExec, $this->whereExec));
+        return $statement->rowCount();
     }
 
-    function where($column, $value, $exp = '=')
+    /**
+     * @return PDO
+     */
+    function getPdo()
     {
-        $this->where .= sprintf("`%s` %s '%s' AND ", $column, $exp, $value);
+        $env = Env::env($this->model->connect ?? 'mysql');
+        $dns = sprintf('mysql:host:%s;dbname:%s', $env['ip'], $env['database']);
+        return new PDO($dns, $env['username'], $env['password']);
+    }
+
+    function where($column, $datum)
+    {
+        $this->whereSql    .= "$column=? ";
+        $this->whereExec[] =  $datum;
         return $this;
+    }
+
+    function whereIn($column, $data)
+    {
+        return $this->in($column, $data);
+    }
+
+    function whereNotIn($column, $data)
+    {
+        return $this->in($column, $data, 'NOT');
+    }
+
+    function in($column, $data, $not = '')
+    {
+        $sql             =  $this->withCompact($data);
+        $this->whereSql  .= "$column $not IN " . $sql;
+        $this->whereExec =  array_merge($this->whereExec, $data);
+        return $this;
+    }
+
+    function withCompact($data)
+    {
+        $sql = implode(', ', array_pad([], count($data), '?'));
+        return "($sql)";
     }
 }

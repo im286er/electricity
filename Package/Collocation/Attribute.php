@@ -4,26 +4,26 @@ namespace Package\Collocation;
 
 class Attribute
 {
-    protected $attribute = [];
+    protected $attributes = [];
 
-    function __construct($attribute = [])
+    function __construct($attributes = [])
     {
-        $this->attribute = $attribute;
+        $this->attributes = $attributes;
     }
 
     function __get($name)
     {
-        return $this->attribute[$name] ?? null;
+        return $this->attributes[$name] ?? null;
     }
 
     function __set($name, $value)
     {
-        $this->attribute[$name] = $value;
+        $this->attributes[$name] = $value;
     }
 
-    function getAttribute()
+    function getAttributes()
     {
-        return $this->attribute;
+        return $this->attributes;
     }
 
 }

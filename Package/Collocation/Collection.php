@@ -5,7 +5,7 @@ namespace Package\Collocation;
 class Collection
 {
     /**
-     * @var Attribute $attribute
+     * @var Attribute $attributes
      */
     protected $attribute;
 
@@ -20,6 +20,6 @@ class Collection
 
     function toArray()
     {
-        return $this->attribute->getAttribute();
+        return $this->attribute->getAttributes();
     }
 }
