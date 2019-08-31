@@ -5,25 +5,21 @@ namespace Package\Database\Mysql;
 use Package\Env\Env;
 use PDO;
 
-class Builder {
+class MysqlBuilder {
 
-    /** @var Model null $model */
-    protected $model      = null;
+    /** @var MysqlModel null $mysqlModel */
+    protected $mysqlModel      = null;
 
     /**
      * @var array
-     * ['column', '=',     'datum']
-     * ['column', '!=',    'datum']
-     * ['column', 'in',    ['datum_1', 'datum_2']]
-     * ['column', 'notIn', ['datum_1', 'datum_2']]
      */
     protected $whereExec = [];
 
     protected $whereSql  = '';
 
-    function __construct(Model $model)
+    function __construct(MysqlModel $mysqlModel)
     {
-        $this->model = $model;
+        $this->mysqlModel = $mysqlModel;
     }
 
     function insert($attributeItems, $columns = null)
@@ -33,7 +29,7 @@ class Builder {
             $columns = array_keys($attributeItems[0]);
         }
         $columnsSql = implode(', ', $columns);
-        $sql        = 'INSERT INTO' . ' ' . $this->model->table . " ($columnsSql) VALUES ";
+        $sql        = 'INSERT INTO' . ' ' . $this->mysqlModel->table . " ($columnsSql) VALUES ";
         $withExec   = [];
         foreach ($attributeItems as $attribute)
         {
@@ -45,7 +41,7 @@ class Builder {
 
     function delete()
     {
-        $sql = 'DELETE FROM' . ' ' . $this->model->table . ' ';
+        $sql = 'DELETE FROM' . ' ' . $this->mysqlModel->table . ' ';
         return $this->execSql($sql, []);
     }
 
@@ -57,7 +53,7 @@ class Builder {
      */
     function update($attributes)
     {
-        $sql      = 'UPDATE ' . $this->model->table . ' SET ';
+        $sql      = 'UPDATE ' . $this->mysqlModel->table . ' SET ';
         $withExec = [];
         foreach ($attributes as $column => $datum)
         {
@@ -81,7 +77,7 @@ class Builder {
      */
     function getPdo()
     {
-        $env = Env::env($this->model->connect ?? 'mysql');
+        $env = Env::env($this->mysqlModel->connect ?? 'mysql');
         $dns = sprintf('mysql:host:%s;dbname:%s', $env['ip'], $env['database']);
         return new PDO($dns, $env['username'], $env['password']);
     }

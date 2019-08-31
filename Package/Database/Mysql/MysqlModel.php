@@ -6,7 +6,7 @@ use Package\Collocation\Attribute;
 use Exception;
 use PDO;
 
-class Model extends Attribute {
+class MysqlModel extends Attribute {
 
     public $table      = null;
 
@@ -16,7 +16,7 @@ class Model extends Attribute {
 
     function save()
     {
-        $builder    = new Builder($this);
+        $builder    = new MysqlBuilder($this);
         $attributes = $this->attributes;
         if ($primary = $this->attributes[$this->primaryKey])
         {
