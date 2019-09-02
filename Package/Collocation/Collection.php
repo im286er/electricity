@@ -2,24 +2,61 @@
 
 namespace Package\Collocation;
 
-class Collection
+use Iterator;
+
+class Collection implements Iterator
 {
     /**
-     * @var Attribute $attributes
+     * @var array $datas
      */
-    protected $attribute;
+    protected $data;
+
+    protected $key;
+
+    protected $datum;
 
     /**
      * Collection constructor.
-     * @param Attribute $attribute
+     * @param array $data
      */
-    function __construct(Attribute $attribute)
+    function __construct(array $data)
     {
-        $this->attribute = $attribute;
+        $this->data = $data;
+    }
+
+    function count()
+    {
+        return count($this->data);
     }
 
     function toArray()
     {
-        return $this->attribute->getAttributes();
+        return $this->data;
+    }
+
+    public function key()
+    {
+        return $this->key;
+    }
+
+    public function rewind()
+    {
+        $this->key = 0;
+        $this->datum = $this->data[$this->key];
+    }
+
+    public function valid()
+    {
+        return isset($this->data[$this->key]);
+    }
+
+    public function next()
+    {
+        $this->datum = $this->data[++$this->key];
+    }
+
+    function current()
+    {
+        return $this->datum;
     }
 }

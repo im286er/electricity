@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use Exception;
+use Package\Collocation\Collection;
 
 class Controller
 {
@@ -13,11 +13,6 @@ class Controller
 
     function privateController()
     {
-        $parameters = new Parameters();
-        echo $parameters->name;
-        echo $parameters->age;
-        echo $parameters->mobile;
-        echo $parameters->phone;
         return 'privateController';
     }
 }

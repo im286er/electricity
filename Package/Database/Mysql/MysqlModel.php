@@ -3,9 +3,15 @@
 namespace Package\Database\Mysql;
 
 use Package\Collocation\Attribute;
-use Exception;
-use PDO;
 
+/**
+ * Class MysqlModel
+ * @package Package\Database\Mysql
+ *
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ */
 class MysqlModel extends Attribute {
 
     public $table      = null;
@@ -13,6 +19,21 @@ class MysqlModel extends Attribute {
     public $connect    = null;
 
     public $primaryKey = 'id';
+
+    static function query()
+    {
+        return new MysqlBuilder(new static());
+    }
+
+    protected function hasMany(MysqlBuilder $mysqlBuilder, $modelKey, $targetKey)
+    {
+        return $mysqlBuilder->where($targetKey, $this->$modelKey)->get();
+    }
+
+    protected function hasOne(MysqlBuilder $mysqlBuilder, $modelKey, $targetKey)
+    {
+        return $mysqlBuilder->where($targetKey, $this->$modelKey)->first();
+    }
 
     function save()
     {

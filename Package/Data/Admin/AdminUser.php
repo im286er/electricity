@@ -2,7 +2,7 @@
 
 namespace Package\Data\Admin;
 
-use App\Models\Model;
+use Package\Database\Mysql\MysqlModel;
 
 /**
  * Class AdminUser
@@ -19,7 +19,7 @@ use App\Models\Model;
  * @property integer $principal_sex
  * @property integer $login_count
  */
-class AdminUser extends Model
+class AdminUser extends MysqlModel
 {
 
 }
